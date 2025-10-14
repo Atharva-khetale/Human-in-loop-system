@@ -1,0 +1,6 @@
+"task_id,task_type,name,description,priority,amount,currency,scheduled_time"
+"task_001,payment_processing,Client Payment,Process client invoice payment,1,5000.00,USD,2024-01-15 10:00:00"
+"task_002,data_processing,User Data Import,Import user data from CSV,2,,,2024-01-15 10:30:00"
+"task_003,system_deployment,API Deployment,Deploy new API version to production,1,,,2024-01-15 11:00:00"
+"task_004,payment_processing,Vendor Payment,Pay vendor for services,2,12000.00,USD,2024-01-15 11:30:00"
+"task_005,user_onboarding,New Customer Setup,Onboard new enterprise customer,1,,,2024-01-15 12:00:00"

@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Analytics - Automated Human-in-Loop System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .stat-card {
+            transition: transform 0.2s;
+        }
+        .stat-card:hover {
+            transform: translateY(-2px);
+        }
+        .chart-container {
+            position: relative;
+            height: 300px;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-robot"></i> Automated Human-in-Loop System
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="/"><i class="fas fa-home"></i> Dashboard</a>
+                <a class="nav-link" href="/workflows"><i class="fas fa-tasks"></i> Workflows</a>
+                <a class="nav-link" href="/approvals"><i class="fas fa-user-check"></i> Approvals</a>
+                <a class="nav-link active" href="/analytics"><i class="fas fa-chart-bar"></i> Analytics</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <h1><i class="fas fa-chart-bar"></i> System Analytics</h1>
+        <p class="text-muted">Real-time insights and performance metrics</p>
+
+        <!-- Key Metrics -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card stat-card bg-primary text-white">
+                    <div class="card-body text-center">
+                        <i class="fas fa-play-circle fa-2x mb-2"></i>
+                        <h3 id="totalWorkflows">0</h3>
+                        <small>Total Workflows</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stat-card bg-success text-white">
+                    <div class="card-body text-center">
+                        <i class="fas fa-check-circle fa-2x mb-2"></i>
+                        <h3 id="completionRate">0%</h3>
+                        <small>Success Rate</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stat-card bg-warning text-white">
+                    <div class="card-body text-center">
+                        <i class="fas fa-clock fa-2x mb-2"></i>
+                        <h3 id="avgCompletionTime">0m</h3>
+                        <small>Avg. Completion</small>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card stat-card bg-info text-white">
+                    <div class="card-body text-center">
+                        <i class="fas fa-users fa-2x mb-2"></i>
+                        <h3 id="pendingApprovals">0</h3>
+                        <small>Pending Approvals</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Status Distribution Chart -->
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-chart-pie"></i> Workflow Status Distribution</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="statusChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Task Type Distribution -->
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-chart-bar"></i> Task Type Distribution</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="taskTypeChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Approval Metrics -->
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-user-check"></i> Approval Statistics</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="approvalChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Performance Over Time -->
+            <div class="col-md-6 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-chart-line"></i> Daily Completions</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="timelineChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detailed Statistics -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-table"></i> Performance Details</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row text-center">
+                            <div class="col-md-3">
+                                <h4 id="totalCompleted">0</h4>
+                                <small class="text-muted">Completed Today</small>
+                            </div>
+                            <div class="col-md-3">
+                                <h4 id="totalFailed">0</h4>
+                                <small class="text-muted">Failed Today</small>
+                            </div>
+                            <div class="col-md-3">
+                                <h4 id="avgApprovalTime">0m</h4>
+                                <small class="text-muted">Avg. Approval Time</small>
+                            </div>
+                            <div class="col-md-3">
+                                <h4 id="rollbackCount">0</h4>
+                                <small class="text-muted">Total Rollbacks</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Fetch analytics data
+        async function loadAnalytics() {
+            try {
+                const response = await fetch('/api/metrics');
+                const metrics = await response.json();
+                
+                updateMetrics(metrics);
+                createCharts(metrics);
+                
+            } catch (error) {
+                console.error('Error loading analytics:', error);
+            }
+        }
+
+        function updateMetrics(metrics) {
+            document.getElementById('totalWorkflows').textContent = metrics.total_workflows;
+            
+            const completed = metrics.workflows_by_status.completed || 0;
+            const successRate = metrics.total_workflows > 0 ? 
+                Math.round((completed / metrics.total_workflows) * 100) : 0;
+            document.getElementById('completionRate').textContent = successRate + '%';
+            
+            document.getElementById('pendingApprovals').textContent = metrics.approval_stats.pending;
+            document.getElementById('totalCompleted').textContent = metrics.approval_stats.approved_today || 0;
+            document.getElementById('totalFailed').textContent = metrics.approval_stats.rejected_today || 0;
+        }
+
+        function createCharts(metrics) {
+            // Status Distribution Chart
+            const statusCtx = document.getElementById('statusChart').getContext('2d');
+            new Chart(statusCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(metrics.workflows_by_status),
+                    datasets: [{
+                        data: Object.values(metrics.workflows_by_status),
+                        backgroundColor: [
+                            '#007bff', '#28a745', '#ffc107', '#dc3545', '#6c757d'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+
+            // Task Type Chart
+            const taskTypeCtx = document.getElementById('taskTypeChart').getContext('2d');
+            new Chart(taskTypeCtx, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(metrics.workflows_by_type),
+                    datasets: [{
+                        label: 'Workflows by Type',
+                        data: Object.values(metrics.workflows_by_type),
+                        backgroundColor: '#17a2b8'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+        }
+
+        // Load analytics on page load
+        document.addEventListener('DOMContentLoaded', loadAnalytics);
+        
+        // Auto-refresh every 30 seconds
+        setInterval(loadAnalytics, 30000);
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

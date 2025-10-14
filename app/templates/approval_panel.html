@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Approvals - Automated Human-in-Loop System</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        .approval-card {
+            border-left: 4px solid #ffc107;
+            transition: all 0.3s;
+        }
+        .approval-card:hover {
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .urgency-high {
+            border-left-color: #dc3545 !important;
+        }
+        .urgency-medium {
+            border-left-color: #ffc107 !important;
+        }
+        .urgency-low {
+            border-left-color: #28a745 !important;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-robot"></i> Automated Human-in-Loop System
+            </a>
+            <div class="navbar-nav ms-auto">
+                <a class="nav-link" href="/"><i class="fas fa-home"></i> Dashboard</a>
+                <a class="nav-link" href="/workflows"><i class="fas fa-tasks"></i> Workflows</a>
+                <a class="nav-link active" href="/approvals"><i class="fas fa-user-check"></i> Approvals</a>
+                <a class="nav-link" href="/analytics"><i class="fas fa-chart-bar"></i> Analytics</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1><i class="fas fa-user-check"></i> Approval Panel</h1>
+            <span class="badge bg-warning fs-6" id="pendingCount">0 Pending</span>
+        </div>
+
+        {% if message %}
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endif %}
+
+        <div class="row">
+            {% if approvals %}
+                {% for approval in approvals %}
+                <div class="col-md-6 mb-4">
+                    <div class="card approval-card 
+                        {% if approval.approval_level >= 3 %}urgency-high
+                        {% elif approval.approval_level == 2 %}urgency-medium
+                        {% else %}urgency-low{% endif %}">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">{{ approval.workflow_name }}</h5>
+                            <div>
+                                <span class="badge bg-primary">Level {{ approval.approval_level }}</span>
+                                <span class="badge bg-secondary">{{ approval.task_type }}</span>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <strong>Step:</strong> {{ approval.metadata.step_name }}<br>
+                                <strong>Requested:</strong> {{ approval.requested_at[:16] }}<br>
+                                <strong>Timeout:</strong> {{ approval.timeout_at[:16] }}
+                            </div>
+
+                            {% if approval.metadata.amount %}
+                            <div class="alert alert-info py-2">
+                                <i class="fas fa-money-bill-wave"></i>
+                                <strong>Amount:</strong> {{ approval.metadata.amount }} {{ approval.metadata.currency }}
+                            </div>
+                            {% endif %}
+
+                            {% if approval.metadata.risk_level %}
+                            <div class="alert alert-warning py-2">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <strong>Risk Level:</strong> 
+                                <span class="badge 
+                                    {% if approval.metadata.risk_level == 'high' %}bg-danger
+                                    {% elif approval.metadata.risk_level == 'medium' %}bg-warning
+                                    {% else %}bg-success{% endif %}">
+                                    {{ approval.metadata.risk_level|upper }}
+                                </span>
+                            </div>
+                            {% endif %}
+
+                            <form action="/api/approvals/{{ approval.id }}/respond" method="post">
+                                <div class="mb-3">
+                                    <label for="comments{{ loop.index }}" class="form-label">Comments (Optional):</label>
+                                    <textarea class="form-control" id="comments{{ loop.index }}" name="comments" rows="2" 
+                                              placeholder="Add comments for your decision..."></textarea>
+                                </div>
+                                
+                                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                    <button type="submit" name="action" value="reject" 
+                                            class="btn btn-danger me-md-2" 
+                                            onclick="return confirm('Reject this approval request?')">
+                                        <i class="fas fa-times"></i> Reject
+                                    </button>
+                                    <button type="submit" name="action" value="approve" 
+                                            class="btn btn-success"
+                                            onclick="return confirm('Approve this request?')">
+                                        <i class="fas fa-check"></i> Approve
+                                    </button>
+                                </div>
+                                <input type="hidden" name="approved_by" value="user_{{ loop.index }}">
+                            </form>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+            <div class="col-12">
+                <div class="text-center py-5">
+                    <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
+                    <h3 class="text-success">All Caught Up!</h3>
+                    <p class="text-muted">No pending approval requests at the moment.</p>
+                    <a href="/" class="btn btn-primary">
+                        <i class="fas fa-home"></i> Back to Dashboard
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- Approval History -->
+        <div class="row mt-5">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-history"></i> Recent Approval History</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Workflow</th>
+                                        <th>Step</th>
+                                        <th>Decision</th>
+                                        <th>Approved By</th>
+                                        <th>Time</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="approvalHistory">
+                                    <tr>
+                                        <td colspan="5" class="text-center text-muted">
+                                            Loading approval history...
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Update pending count
+        document.getElementById('pendingCount').textContent = '{{ approvals|length }} Pending';
+
+        // Load approval history
+        async function loadApprovalHistory() {
+            try {
+                // This would fetch from an API endpoint for approval history
+                // For now, we'll simulate with static data
+                const history = [
+                    { workflow: 'Payment Processing', step: 'Manager Approval', decision: 'Approved', approved_by: 'user_1', time: '2 hours ago' },
+                    { workflow: 'System Deployment', step: 'Security Review', decision: 'Rejected', approved_by: 'admin', time: '4 hours ago' },
+                    { workflow: 'Data Import', step: 'Validation', decision: 'Approved', approved_by: 'user_2', time: '1 day ago' }
+                ];
+
+                const tbody = document.getElementById('approvalHistory');
+                tbody.innerHTML = history.map(item => `
+                    <tr>
+                        <td>${item.workflow}</td>
+                        <td>${item.step}</td>
+                        <td><span class="badge ${item.decision === 'Approved' ? 'bg-success' : 'bg-danger'}">${item.decision}</span></td>
+                        <td>${item.approved_by}</td>
+                        <td>${item.time}</td>
+                    </tr>
+                `).join('');
+                
+            } catch (error) {
+                console.error('Error loading approval history:', error);
+            }
+        }
+
+        // Auto-refresh approvals every 30 seconds
+        setInterval(() => {
+            location.reload();
+        }, 30000);
+
+        document.addEventListener('DOMContentLoaded', loadApprovalHistory);
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
