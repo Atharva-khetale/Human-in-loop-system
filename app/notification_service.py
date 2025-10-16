@@ -1,7 +1,7 @@
 import asyncio
 from datetime import datetime
 from typing import Dict, Any
-from models import ApprovalRequest, ApprovalResponse, WorkflowInstance
+from .models import ApprovalRequest, ApprovalResponse, WorkflowInstance
 
 class NotificationService:
     """Simple notification service that works without external dependencies"""
@@ -49,4 +49,5 @@ class NotificationService:
         print(f"Type: {workflow.task_type.value}")
         print(f"Completed at: {workflow.completed_at}")
         print(f"Total steps: {len(workflow.steps)}")
+
         print("=" * 50)
