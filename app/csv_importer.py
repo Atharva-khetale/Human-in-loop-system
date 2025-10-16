@@ -4,8 +4,8 @@ from datetime import datetime, timedelta
 from typing import List, Dict, Any
 import uuid
 import os
-from models import CSVTasks, TaskType, WorkflowCreate, WorkflowStep
-from database import DatabaseManager
+from .models import CSVTasks, TaskType, WorkflowCreate, WorkflowStep
+from .database import DatabaseManager
 
 class CSVImporter:
     def __init__(self, db_manager: DatabaseManager, import_path: str = "data/"):
@@ -177,4 +177,5 @@ class CSVImporter:
             )
         )
         
+
         return base_steps
