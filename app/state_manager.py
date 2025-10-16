@@ -1,7 +1,7 @@
 import json
 from typing import Dict, Any, Optional
 from datetime import datetime
-from models import StateSnapshot
+from .models import StateSnapshot
 
 
 class StateManager:
@@ -37,4 +37,5 @@ class StateManager:
         if snapshots:
             latest_key = sorted(snapshots)[-1]
             return self.memory_store[latest_key]
+
         return None
