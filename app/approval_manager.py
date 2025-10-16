@@ -2,9 +2,9 @@ import asyncio
 import uuid
 from datetime import datetime, timedelta
 from typing import Dict, Any, Optional
-from models import ApprovalRequest, ApprovalResponse, ApprovalAction
-from database import DatabaseManager
-from notification_service import NotificationService
+from .models import ApprovalRequest, ApprovalResponse, ApprovalAction
+from .database import DatabaseManager
+from .notification_service import NotificationService
 
 class ApprovalManager:
     def __init__(self, db_manager: DatabaseManager):
