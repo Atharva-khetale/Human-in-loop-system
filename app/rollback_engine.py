@@ -1,9 +1,9 @@
 import asyncio
 from datetime import datetime
 from typing import Dict, Any
-from models import WorkflowInstance, WorkflowStatus
-from database import DatabaseManager
-from notification_service import NotificationService
+from .models import WorkflowInstance, WorkflowStatus
+from .database import DatabaseManager
+from .notification_service import NotificationService
 
 class RollbackEngine:
     def __init__(self, db_manager: DatabaseManager):
@@ -129,4 +129,5 @@ class RollbackEngine:
         workflow = self.db.get_workflow(workflow_id)
         if workflow:
             workflow['execution_log'].append(event)
+
             self.db.save_workflow(workflow)
