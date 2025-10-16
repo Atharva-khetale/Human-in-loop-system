@@ -1,6 +1,6 @@
 import asyncio
 from typing import Dict, Any
-from models import WorkflowInstance, WorkflowStep
+from .models import WorkflowInstance, WorkflowStep
 
 
 class NotificationService:
@@ -32,4 +32,5 @@ class NotificationService:
     async def send_notification(self, workflow: WorkflowInstance, step: WorkflowStep):
         """Send general notification"""
         print(f"Notification: {step.name} - {workflow.name}")
+
         await asyncio.sleep(0.2)  # Simulate notification delay
